@@ -37,27 +37,33 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rmtz.calendar.libs.Image
+import com.rmtz.calendar.libs.Kalender
 import com.rmtz.calendar.ui.component.nightGradient
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.time.temporal.ChronoUnit
-import java.time.temporal.Temporal
 import java.util.Date
 import java.util.Locale
+import kotlin.math.cos
+import kotlin.math.sin
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("NewApi")
@@ -80,7 +86,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun HalfCircleProgressBar(modifier: Modifier) {
     var progress by remember { mutableStateOf(0f) }
+    val ctx = LocalContext.current
     val icon = painterResource(id = R.drawable.ic_moon)
+    val bitmap = Image.getBitmapFromImage(ctx, R.drawable.ic_moon)
 
     Box(
         modifier = modifier
@@ -112,14 +120,51 @@ fun HalfCircleProgressBar(modifier: Modifier) {
             val iconX = (size.width / 2) + (size.width / 2) * Math.cos(angleInRadians).toFloat() - iconSize / 2
             val iconY = (size.height) + (size.height) * Math.sin(angleInRadians).toFloat() - iconSize / 2
 
+            drawCircle(
+                color = Color.LightGray,
+                radius = 40f,
+                center = Offset(iconX, iconY)
+            )
+
+            translate(left = iconX, top = iconY) {
+                with(icon) {
+                    //   draw(size = painter.intrinsicSize)
+                    draw(
+                        size = Size(20.dp.toPx(), 20.dp.toPx()),
+                        alpha = 1f
+                    )
+                }
+            }
+
+            /*drawImage(
+                image = bitmap.asImageBitmap(),
+                dstRect = Rect(
+                    left = iconX,
+                    top = iconY,
+                    right = iconX + iconSize,
+                    bottom = iconY + iconSize
+                )
+            )*/
+
+
+            /*val iconSize = 24.dp.toPx()
+            val angleInRadians = Math.toRadians(-180.0 + progress.toDouble())
+            val iconX = (size.width / 2) + (size.width / 2) * Math.cos(angleInRadians).toFloat() - iconSize / 2
+            val iconY = (size.height) + (size.height) * Math.sin(angleInRadians).toFloat() - iconSize / 2
+
             drawIntoCanvas { canvas ->
+                canvas.drawArc(
+                    rect = Rect(),
+                    startAngle = iconX,
+                    sweepAngle = iconY
+                )
                 val iconPainter = icon
                 with(iconPainter) {
                     draw(
                         size = Size(iconSize, iconSize),
                     )
                 }
-            }
+            }*/
         }
         // Clock component is placed at the bottom center of the progress bar
         Clock(
@@ -151,16 +196,18 @@ fun Clock(modifier: Modifier, onUpdateProgress: (Float) -> Unit) {
     LaunchedEffect(Unit) {
         while (true) {
             val calendar = Calendar.getInstance()
-            val currentHour = calendar.get(Calendar.HOUR_OF_DAY) % 12 // Get hour in 12-hour format
+            val currentHour = calendar.get(Calendar.HOUR_OF_DAY) % 24
             val currentMinute = calendar.get(Calendar.MINUTE)
-            val currentSecond = calendar.get(Calendar.SECOND)
+            Log.d("Clock", "currentHour: $currentHour, currentMinute: $currentMinute")
 
 // Calculate progress in degrees (0 to 180 degrees)
-            val hourProgress = (currentHour * 180f / 12f) + (currentMinute * 15f / 60f) // Each hour = 15 degrees
+            /*val hourProgress = (currentHour * 180f / 12f) + (currentMinute * 15f / 60f) // Each hour = 15 degrees
             val minuteProgress = currentMinute * 3f // Each minute = 3 degrees
-            val secondProgress = currentSecond * 3f // Each second = 3 degrees
+            val secondProgress = currentSecond * 3f // Each second = 3 degrees*/
 
-            val progress = hourProgress + (minuteProgress / 60f) + (secondProgress / 3600f)
+            val elapsedMinutes = (currentHour - 6) * 60 + currentMinute
+            val totalMinutes = 12 * 60
+            val progress = (elapsedMinutes.toFloat() / totalMinutes.toFloat()) * 180f
             Log.d("Clock Degree", progress.toString())
 
             // Update progress callback for HalfCircleProgressBar
@@ -183,7 +230,6 @@ fun Clock(modifier: Modifier, onUpdateProgress: (Float) -> Unit) {
         )
     }
 }
-
 
 @SuppressLint("NewApi")
 @Composable
@@ -254,20 +300,16 @@ fun CalendarUI() {
     val year = today.year
 
     // Generate days of the month
-    val daysOfMonth = (1..month.length(LocalDate.of(year, month, 1).isLeapYear())).toList()
-    val firstDayOfMonth = LocalDate.of(year, month, 1).dayOfWeek
+    val daysOfMonth = Kalender.getDatesOfMonth(year, month)
+    val firstDayOfMonth = Kalender.getDayInFirstMonth(year, month)
     val startOffset = if (firstDayOfMonth == DayOfWeek.MONDAY) 0 else firstDayOfMonth.value - 1
-    val daysOfWeek = DayOfWeek.entries
-        .map { it.getDisplayName(TextStyle.SHORT, Locale.getDefault()) }
+    val daysOfWeek = Kalender.getDaysInWeeks()
 
     /*Grid Layout*/
     Column {
         HeaderUI(today)
-        // Row for days of the week
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -298,13 +340,12 @@ fun CalendarUI() {
                     day = day,
                     isSelected = isSelected,
                     isWeekend = isWeekend,
-                    offMessage = javaDayOfWeek(LocalDate.of(year, month, day)),
+                    offMessage = Kalender.getDayOfJawa(LocalDate.of(year, month, day)), //javaDayOfWeek(LocalDate.of(year, month, day)),
                     isFirstRow = index < 7
                 )
             }
         }
     }
-
 }
 
 @Composable
@@ -338,20 +379,8 @@ fun CalendarDay(day: Int, isSelected: Boolean, isWeekend: Boolean, offMessage: S
                 style = typography.labelSmall,
                 color = contentColor
             )
-            // You can add more elements here, like events for the day
         }
     }
-}
-
-@SuppressLint("NewApi")
-fun javaDayOfWeek(date: Temporal): String {
-    val epochTime = "1970-01-01 07:00:00"
-    val offMessages = arrayOf("wage", "kliwon", "legi", "pahing", "pon")
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-    val epochDateTime = LocalDate.parse(epochTime, formatter)
-    val daysSinceEpoch = ChronoUnit.DAYS.between(epochDateTime, date)
-    val messageIndex = (daysSinceEpoch % offMessages.size).toInt()
-    return offMessages[messageIndex]
 }
 
 @SuppressLint("NewApi")
