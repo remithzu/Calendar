@@ -13,6 +13,11 @@ class Kalender {
         val epochTime = "1970-01-01 07:00:00"
 
         @SuppressLint("NewApi")
+        fun getToday(): LocalDate {
+            return LocalDate.now()
+        }
+
+        @SuppressLint("NewApi")
         fun getDayOfJawa(date: LocalDate?): String {
             val offMessages = arrayOf("wage", "kliwon", "legi", "pahing", "pon")
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")

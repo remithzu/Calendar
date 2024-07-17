@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Surface
@@ -31,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,6 +57,9 @@ import androidx.compose.ui.unit.sp
 import com.rmtz.calendar.libs.Image
 import com.rmtz.calendar.libs.Kalender
 import com.rmtz.calendar.ui.component.nightGradient
+import com.rmtz.calendar.ui.component.shineGradient
+import com.rmtz.calendar.ui.theme.pagi2
+import com.rmtz.calendar.ui.theme.yellowTransient
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
@@ -73,8 +78,7 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     CalendarUI()
                 }
@@ -85,17 +89,16 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun HalfCircleProgressBar(modifier: Modifier) {
-    var progress by remember { mutableStateOf(0f) }
-    val ctx = LocalContext.current
-    val icon = painterResource(id = R.drawable.ic_moon)
-    val bitmap = Image.getBitmapFromImage(ctx, R.drawable.ic_moon)
+    var progress by remember { mutableFloatStateOf(0f) }
+    val iconSun = painterResource(id = R.drawable.ic_sun)
+    val iconMoon = painterResource(id = R.drawable.ic_moon)
+    var icon by remember { mutableStateOf(iconMoon) }
+    var colorProgress by remember { mutableStateOf(nightGradient)}
+    var colorCircle by remember { mutableStateOf(Color.LightGray)}
 
-    Box(
-        modifier = modifier
-            .background(Color.Transparent)
-    ) {
+    Box( modifier = modifier .background(Color.Transparent) ) {
         Canvas(modifier) {
-            // Draw gray background arc
+            /* Base ProgressBar */
             drawArc(
                 color = Color.LightGray,
                 startAngle = -180f,
@@ -104,10 +107,9 @@ fun HalfCircleProgressBar(modifier: Modifier) {
                 size = Size(size.width, size.height * 2),
                 style = Stroke(8.dp.toPx(), cap = StrokeCap.Round)
             )
-
-            // Draw green progress arc
+            /* Running Progress ProgressBar */
             drawArc(
-                brush = nightGradient,
+                brush = colorProgress,
                 startAngle = -180f,
                 sweepAngle = progress,
                 useCenter = false,
@@ -119,52 +121,20 @@ fun HalfCircleProgressBar(modifier: Modifier) {
             val angleInRadians = Math.toRadians(-180.0 + progress.toDouble())
             val iconX = (size.width / 2) + (size.width / 2) * Math.cos(angleInRadians).toFloat() - iconSize / 2
             val iconY = (size.height) + (size.height) * Math.sin(angleInRadians).toFloat() - iconSize / 2
-
+            /* Draw Circle Point */
             drawCircle(
-                color = Color.LightGray,
+                color = colorCircle,
                 radius = 40f,
-                center = Offset(iconX, iconY)
+                center = Offset(iconX+27f, iconY+26f)
             )
-
+            /* Draw Icon top of Circle Point */
             translate(left = iconX, top = iconY) {
                 with(icon) {
-                    //   draw(size = painter.intrinsicSize)
                     draw(
-                        size = Size(20.dp.toPx(), 20.dp.toPx()),
-                        alpha = 1f
+                        size = Size(20.dp.toPx(), 20.dp.toPx())
                     )
                 }
             }
-
-            /*drawImage(
-                image = bitmap.asImageBitmap(),
-                dstRect = Rect(
-                    left = iconX,
-                    top = iconY,
-                    right = iconX + iconSize,
-                    bottom = iconY + iconSize
-                )
-            )*/
-
-
-            /*val iconSize = 24.dp.toPx()
-            val angleInRadians = Math.toRadians(-180.0 + progress.toDouble())
-            val iconX = (size.width / 2) + (size.width / 2) * Math.cos(angleInRadians).toFloat() - iconSize / 2
-            val iconY = (size.height) + (size.height) * Math.sin(angleInRadians).toFloat() - iconSize / 2
-
-            drawIntoCanvas { canvas ->
-                canvas.drawArc(
-                    rect = Rect(),
-                    startAngle = iconX,
-                    sweepAngle = iconY
-                )
-                val iconPainter = icon
-                with(iconPainter) {
-                    draw(
-                        size = Size(iconSize, iconSize),
-                    )
-                }
-            }*/
         }
         // Clock component is placed at the bottom center of the progress bar
         Clock(
@@ -173,14 +143,24 @@ fun HalfCircleProgressBar(modifier: Modifier) {
                 .padding(horizontal = 0.dp, vertical = 12.dp),
             onUpdateProgress = {
                 progress = it
-                Log.d("HalfCircleProgressBar", it.toString())
+            },
+            onUpdateHour = {
+                if (it in 6..18) {
+                    colorProgress = shineGradient
+                    icon = iconSun
+                    colorCircle = yellowTransient
+                } else {
+                    colorProgress = nightGradient
+                    icon = iconMoon
+                    colorCircle = Color.LightGray
+                }
             }
         )
     }
 }
 
 @Composable
-fun Clock(modifier: Modifier, onUpdateProgress: (Float) -> Unit) {
+fun Clock(modifier: Modifier, onUpdateProgress: (Float) -> Unit, onUpdateHour: (Int) -> Unit) {
     var currentTime by remember { mutableStateOf(Date()) }
 
     val updateTimeMillis = 1000L // Update current time every second
@@ -212,6 +192,7 @@ fun Clock(modifier: Modifier, onUpdateProgress: (Float) -> Unit) {
 
             // Update progress callback for HalfCircleProgressBar
             onUpdateProgress(progress)
+            onUpdateHour(currentHour)
 
             delay(updateProgressMillis)
         }
@@ -295,9 +276,8 @@ fun HeaderUI(today: LocalDate) {
 @SuppressLint("NewApi")
 @Composable
 fun CalendarUI() {
-    val today = remember { LocalDate.now() }
-    val month = today.month
-    val year = today.year
+    val month = Kalender.getToday().month
+    val year = Kalender.getToday().year
 
     // Generate days of the month
     val daysOfMonth = Kalender.getDatesOfMonth(year, month)
@@ -307,9 +287,11 @@ fun CalendarUI() {
 
     /*Grid Layout*/
     Column {
-        HeaderUI(today)
+        HeaderUI(Kalender.getToday())
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -333,10 +315,10 @@ fun CalendarUI() {
                 item { Spacer(modifier = Modifier.aspectRatio(1f)) }
             }
             itemsIndexed(daysOfMonth) { index, day ->
-                val isSelected = LocalDate.of(year, month, day) == today
+                val isSelected = LocalDate.of(year, month, day) == Kalender.getToday()
                 val isWeekend = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SATURDAY ||
                         LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SUNDAY
-                CalendarDay(
+                ItemDate(
                     day = day,
                     isSelected = isSelected,
                     isWeekend = isWeekend,
@@ -348,8 +330,9 @@ fun CalendarUI() {
     }
 }
 
+/* Kalender */
 @Composable
-fun CalendarDay(day: Int, isSelected: Boolean, isWeekend: Boolean, offMessage: String, isFirstRow: Boolean) {
+fun ItemDate(day: Int, isSelected: Boolean, isWeekend: Boolean, offMessage: String, isFirstRow: Boolean) {
     val backgroundColor = when {
         isSelected -> MaterialTheme.colorScheme.primaryContainer
         isWeekend -> Color.LightGray
@@ -361,24 +344,32 @@ fun CalendarDay(day: Int, isSelected: Boolean, isWeekend: Boolean, offMessage: S
         modifier = Modifier
             .fillMaxSize()
             .aspectRatio(1f)
-            .padding(4.dp),
-        color = backgroundColor
+            .padding(4.dp)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    color = backgroundColor, // Inner content color
+                    shape = RoundedCornerShape(50.dp) // Same radius as outer box
+                )
         ) {
-            Text(
-                text = day.toString(),
-                style = typography.headlineSmall,
-                color = contentColor
-            )
-            Text(
-                text = offMessage,
-                style = typography.labelSmall,
-                color = contentColor
-            )
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = day.toString(),
+                    style = typography.labelLarge,
+                    color = contentColor
+                )
+                Text(
+                    text = offMessage,
+                    style = typography.labelSmall,
+                    color = contentColor
+                )
+            }
         }
     }
 }
