@@ -1,6 +1,7 @@
 package com.rmtz.calendar
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.util.Log
@@ -21,10 +22,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Surface
@@ -51,6 +54,7 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,6 +62,8 @@ import com.rmtz.calendar.libs.Image
 import com.rmtz.calendar.libs.Kalender
 import com.rmtz.calendar.ui.component.nightGradient
 import com.rmtz.calendar.ui.component.shineGradient
+import com.rmtz.calendar.ui.theme.FlatUiColors
+import com.rmtz.calendar.ui.theme.FlatUiColors.inverse
 import com.rmtz.calendar.ui.theme.pagi2
 import com.rmtz.calendar.ui.theme.yellowTransient
 import kotlinx.coroutines.delay
@@ -78,7 +84,8 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    color = FlatUiColors.BasicPallete.LightenDark
                 ) {
                     CalendarUI()
                 }
@@ -180,18 +187,19 @@ fun Clock(modifier: Modifier, onUpdateProgress: (Float) -> Unit, onUpdateHour: (
             val currentMinute = calendar.get(Calendar.MINUTE)
             Log.d("Clock", "currentHour: $currentHour, currentMinute: $currentMinute")
 
-// Calculate progress in degrees (0 to 180 degrees)
-            /*val hourProgress = (currentHour * 180f / 12f) + (currentMinute * 15f / 60f) // Each hour = 15 degrees
-            val minuteProgress = currentMinute * 3f // Each minute = 3 degrees
-            val secondProgress = currentSecond * 3f // Each second = 3 degrees*/
-
             val elapsedMinutes = (currentHour - 6) * 60 + currentMinute
             val totalMinutes = 12 * 60
-            val progress = (elapsedMinutes.toFloat() / totalMinutes.toFloat()) * 180f
-            Log.d("Clock Degree", progress.toString())
+            val calcDegrees = (elapsedMinutes.toFloat() / totalMinutes.toFloat()) * 180f
+            var degrees = 0f
+            Log.d("Clock Degree", calcDegrees.toString())
 
-            // Update progress callback for HalfCircleProgressBar
-            onUpdateProgress(progress)
+            if (currentHour in 6..18) {
+                degrees = calcDegrees
+            } else {
+                degrees = calcDegrees - 180f
+            }
+
+            onUpdateProgress(degrees)
             onUpdateHour(currentHour)
 
             delay(updateProgressMillis)
@@ -266,7 +274,7 @@ fun HeaderUI(today: LocalDate) {
                 HalfCircleProgressBar(modifier = Modifier
                     .clipToBounds()
                     .fillMaxWidth(1f)
-                    .height(130.dp)
+                    .height(140.dp)
                     .padding(16.dp))
             }
         }
@@ -316,14 +324,15 @@ fun CalendarUI() {
             }
             itemsIndexed(daysOfMonth) { index, day ->
                 val isSelected = LocalDate.of(year, month, day) == Kalender.getToday()
-                val isWeekend = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SATURDAY ||
-                        LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SUNDAY
+                val isFriday = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SATURDAY
+                val isWeekend = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SUNDAY
                 ItemDate(
                     day = day,
                     isSelected = isSelected,
+                    isFriday = isFriday,
                     isWeekend = isWeekend,
                     offMessage = Kalender.getDayOfJawa(LocalDate.of(year, month, day)), //javaDayOfWeek(LocalDate.of(year, month, day)),
-                    isFirstRow = index < 7
+                    isHoliday = false
                 )
             }
         }
@@ -332,13 +341,26 @@ fun CalendarUI() {
 
 /* Kalender */
 @Composable
-fun ItemDate(day: Int, isSelected: Boolean, isWeekend: Boolean, offMessage: String, isFirstRow: Boolean) {
-    val backgroundColor = when {
-        isSelected -> MaterialTheme.colorScheme.primaryContainer
-        isWeekend -> Color.LightGray
-        else -> Color.Transparent
+fun ItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: Boolean, offMessage: String, isHoliday: Boolean) {
+    val backgroundColor = if(isSelected) {
+        if (isHoliday) {
+            FlatUiColors.GermanPallet.Desire.inverse()
+        } else {
+            FlatUiColors.GermanPallet.HighBlue
+        }
+    } else {
+        Color.Transparent
     }
-    val contentColor = if (isSelected || isWeekend) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+
+    val textColor = if (isSelected) {
+        FlatUiColors.BasicPallete.LightenDark
+    } else if (isFriday) {
+        FlatUiColors.GermanPallet.ReptileGreen
+    } else if (isWeekend) {
+        FlatUiColors.GermanPallet.Desire
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
 
     Surface(
         modifier = Modifier
@@ -362,20 +384,36 @@ fun ItemDate(day: Int, isSelected: Boolean, isWeekend: Boolean, offMessage: Stri
                 Text(
                     text = day.toString(),
                     style = typography.labelLarge,
-                    color = contentColor
+                    color = textColor
                 )
                 Text(
                     text = offMessage,
                     style = typography.labelSmall,
-                    color = contentColor
+                    color = textColor
                 )
+                LazyRow {
+
+                }
             }
         }
     }
 }
 
-@SuppressLint("NewApi")
-@Preview(showBackground = true)
+@Preview(
+    name = "Light Mode",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    device = Devices.PIXEL_4_XL,
+    showSystemUi = true
+)
+@Preview(
+    name = "Dark Mode",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    device = Devices.PIXEL_4_XL,
+    showSystemUi = true
+)
+
 @Composable
 fun GreetingPreview() {
     MaterialTheme {
