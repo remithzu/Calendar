@@ -217,6 +217,17 @@ val surfaceContainerDarkHighContrast = Color(0xFF1F1F25)
 val surfaceContainerHighDarkHighContrast = Color(0xFF29292F)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF34343A)
 
+val pagi1 = Color(0xff3b3d50)
+val pagi2 = Color(0xffa7aac5)
+val pagi3 = Color(0xffc8ecff)
+val siang1 = Color(0xffeaa017)
+val siang2 = Color(0xffea6017)
+val sore1 = Color(0xffb2734c)
+val sore2 = Color(0xff4f3621)
+val malam1 = Color(0xff3b3b3b)
+val malam2 = Color(0xff1c1c1c)
+val yellowTransient = Color(0xffffe39c)
+
 
 
 
