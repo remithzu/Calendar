@@ -23,9 +23,11 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -65,6 +67,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import kotlin.math.abs
 
 @Composable
 fun HalfCircleProgressBar(modifier: Modifier) {
@@ -101,13 +104,13 @@ fun HalfCircleProgressBar(modifier: Modifier) {
             val iconX = (size.width / 2) + (size.width / 2) * Math.cos(angleInRadians).toFloat() - iconSize / 2
             val iconY = (size.height) + (size.height) * Math.sin(angleInRadians).toFloat() - iconSize / 2
             /* Draw Circle Point */
-            drawCircle(
+            /*drawCircle(
                 color = colorCircle,
                 radius = 40f,
                 center = Offset(iconX+27f, iconY+26f)
-            )
+            )*/
             /* Draw Icon top of Circle Point */
-            translate(left = iconX, top = iconY) {
+            translate(left = iconX+8f, top = iconY) {
                 with(icon) {
                     draw(
                         size = Size(20.dp.toPx(), 20.dp.toPx())
@@ -171,6 +174,8 @@ fun Clock(modifier: Modifier, onUpdateProgress: (Float) -> Unit, onUpdateHour: (
                 degrees = calcDegrees - 180f
             }
 
+            Log.d("Clock currentHour", currentHour.toString())
+            Log.d("Clock Degree", degrees.toString())
             onUpdateProgress(degrees)
             onUpdateHour(currentHour)
 
@@ -246,7 +251,7 @@ fun HeaderUI(today: LocalDate) {
                 HalfCircleProgressBar(modifier = Modifier
                     .clipToBounds()
                     .fillMaxWidth(1f)
-                    .height(140.dp)
+                    .height(145.dp)
                     .padding(16.dp)
                 )
             }
@@ -322,7 +327,7 @@ fun ItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: Boolea
             FlatUiColors.GermanPallet.HighBlue
         }
     } else {
-        Color.Transparent
+        MaterialTheme.colorScheme.background
     }
 
     val textColor = if (isSelected) {
@@ -365,7 +370,6 @@ fun ItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: Boolea
                     color = textColor
                 )
                 LazyRow {
-
                 }
             }
         }
@@ -375,13 +379,6 @@ fun ItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: Boolea
 @Preview(
     name = "Light Mode",
     uiMode = Configuration.UI_MODE_NIGHT_NO,
-    showBackground = true,
-    device = Devices.PIXEL_4_XL,
-    showSystemUi = true
-)
-@Preview(
-    name = "Dark Mode",
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
     showBackground = true,
     device = Devices.PIXEL_4_XL,
     showSystemUi = true
