@@ -223,9 +223,9 @@ val pagi3 = Color(0xffc8ecff)
 val siang1 = Color(0xffeaa017)
 val siang2 = Color(0xffea6017)
 val sore1 = Color(0xffb2734c)
-val sore2 = Color(0xff4f3621)
-val malam1 = Color(0xff3b3b3b)
-val malam2 = Color(0xff1c1c1c)
+val sore2 = Color(0xff786895)
+val malam1 = Color(0xff465387)
+val malam2 = Color(0xff202b58)
 val yellowTransient = Color(0xffffe39c)
 
 

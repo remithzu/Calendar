@@ -27,6 +27,11 @@ val nightGradient = Brush.horizontalGradient(
     )
 )
 
+/*#b5d6e0	(181,214,224)
+#c7e1e5	(199,225,229)
+#ffef7a	(255,239,122)
+#f7c16a	(247,193,106)
+#f46a55	(244,106,85)*/
 val shineGradient = Brush.horizontalGradient(
     colorStops = arrayOf(
         0.0f to pagi3,

@@ -72,6 +72,7 @@ import kotlin.math.abs
 @Composable
 fun HalfCircleProgressBar(modifier: Modifier) {
     var progress by remember { mutableFloatStateOf(0f) }
+    var startAngle by remember { mutableFloatStateOf(-180f) }
     val iconSun = painterResource(id = R.drawable.ic_sun)
     val iconMoon = painterResource(id = R.drawable.ic_moon)
     var icon by remember { mutableStateOf(iconMoon) }
@@ -92,7 +93,7 @@ fun HalfCircleProgressBar(modifier: Modifier) {
             /* Running Progress ProgressBar */
             drawArc(
                 brush = colorProgress,
-                startAngle = -180f,
+                startAngle = startAngle,
                 sweepAngle = progress,
                 useCenter = false,
                 size = Size(size.width, size.height * 2),
@@ -125,6 +126,8 @@ fun HalfCircleProgressBar(modifier: Modifier) {
                 .padding(horizontal = 0.dp, vertical = 12.dp),
             onUpdateProgress = {
                 progress = it
+                startAngle = -180f
+                Log.d("HalfCircleProgressBar", progress.toString())
             },
             onUpdateHour = {
                 if (it in 6..18) {
@@ -164,7 +167,7 @@ fun Clock(modifier: Modifier, onUpdateProgress: (Float) -> Unit, onUpdateHour: (
 
             val elapsedMinutes = (currentHour - 6) * 60 + currentMinute
             val totalMinutes = 12 * 60
-            val calcDegrees = (elapsedMinutes.toFloat() / totalMinutes.toFloat()) * 180f
+            val calcDegrees = abs((elapsedMinutes.toFloat() / totalMinutes.toFloat()) * 180f)
             var degrees = 0f
             Log.d("Clock Degree", calcDegrees.toString())
 
@@ -173,10 +176,11 @@ fun Clock(modifier: Modifier, onUpdateProgress: (Float) -> Unit, onUpdateHour: (
             } else {
                 degrees = calcDegrees - 180f
             }
+            if (degrees >= 180f) degrees = 180f
 
             Log.d("Clock currentHour", currentHour.toString())
             Log.d("Clock Degree", degrees.toString())
-            onUpdateProgress(degrees)
+            onUpdateProgress(abs(degrees))
             onUpdateHour(currentHour)
 
             delay(updateProgressMillis)
