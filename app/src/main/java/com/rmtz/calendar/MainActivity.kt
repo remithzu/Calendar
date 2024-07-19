@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -31,10 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import com.rmtz.calendar.ui.component.roundedTopCornerShape
 import com.rmtz.calendar.ui.theme.AppTheme
+import com.rmtz.calendar.ui.theme.FlatUiColors
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
     @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +48,7 @@ class MainActivity : ComponentActivity() {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = FlatUiColors.CanadianPallet.WildCaribbeanGreen
                 ) {
                     TemplateUI()
                 }
@@ -65,16 +70,9 @@ fun TemplateUI() {
         Text("Bottom sheet content goes here")
     }
 
-    val roundedBottomSheetShape = RoundedCornerShape(
-        topStart = 16.dp,
-        topEnd = 16.dp,
-        bottomStart = 0.dp,
-        bottomEnd = 0.dp
-    )
-
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
-        sheetShape = roundedBottomSheetShape,
+        sheetShape = roundedTopCornerShape,
         sheetPeekHeight = 95.dp,
         sheetContent = {
             Column(
@@ -98,7 +96,6 @@ fun TemplateUI() {
                     ExtendedFloatingActionButton(
                         modifier = Modifier.padding(it),
                         onClick = {
-                            // show snackbar as a suspend function
                             scope.launch {
                                 snackbarHostState.showSnackbar(
                                     "Snackbar # ${++clickCount}"
@@ -108,7 +105,7 @@ fun TemplateUI() {
                     ) { Text("Show snackbar") }
                 },
                 content = { innerPadding ->
-                    CalendarUI(innerPadding)
+                    KalenderUI(innerPadding)
                 }
             )
         }

@@ -5,12 +5,20 @@ import java.util.Locale
 
 fun String.toHari(): String {
     return when (this.toLowerCase(Locale.ENGLISH)) {
-        "monday","mon" -> "Senin"
-        "tuesday","tue" -> "Selasa"
-        "wednesday","wed" -> "Rabu"
-        "thursday","thu" -> "Kamis"
-        "friday","fri" -> "Jumat"
-        "saturday","sat" -> "Sabtu"
+        "monday" -> "Senin"
+        "tuesday" -> "Selasa"
+        "wednesday" -> "Rabu"
+        "thursday" -> "Kamis"
+        "friday" -> "Jumat"
+        "saturday" -> "Sabtu"
+        "sunday" -> "Minggu"
+        "mon" -> "Sen"
+        "tue" -> "Sel"
+        "wed" -> "Rab"
+        "thu" -> "Kam"
+        "fri" -> "Jum"
+        "sat" -> "Sab"
+        "sun" -> "Min"
         else -> ""
     }
 }

@@ -54,7 +54,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rmtz.calendar.libs.Kalender
+import com.rmtz.calendar.libs.toHari
+import com.rmtz.calendar.ui.component.KalenderWidget
 import com.rmtz.calendar.ui.component.nightGradient
+import com.rmtz.calendar.ui.component.roundedCornerShape
 import com.rmtz.calendar.ui.component.shineGradient
 import com.rmtz.calendar.ui.theme.AppTheme
 import com.rmtz.calendar.ui.theme.FlatUiColors
@@ -265,11 +268,9 @@ fun HeaderUI(today: LocalDate) {
 
 @SuppressLint("NewApi")
 @Composable
-fun CalendarUI(innerPadding: PaddingValues) {
+fun KalenderUI(innerPadding: PaddingValues) {
     val month = Kalender.getToday().month
     val year = Kalender.getToday().year
-
-    // Generate days of the month
     val daysOfMonth = Kalender.getDatesOfMonth(year, month)
     val firstDayOfMonth = Kalender.getDayInFirstMonth(year, month)
     val startOffset = if (firstDayOfMonth == DayOfWeek.MONDAY) 0 else firstDayOfMonth.value - 1
@@ -278,105 +279,7 @@ fun CalendarUI(innerPadding: PaddingValues) {
     /*Grid Layout*/
     Column() {
         HeaderUI(Kalender.getToday())
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            daysOfWeek.forEach { day ->
-                Text(
-                    text = day,
-                    style = typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(7), // 7 columns for 7 days of the week
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(8.dp)
-        ) {
-            repeat(startOffset) {
-                item { Spacer(modifier = Modifier.aspectRatio(1f)) }
-            }
-            itemsIndexed(daysOfMonth) { index, day ->
-                val isSelected = LocalDate.of(year, month, day) == Kalender.getToday()
-                val isFriday = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SATURDAY
-                val isWeekend = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SUNDAY
-                ItemDate(
-                    day = day,
-                    isSelected = isSelected,
-                    isFriday = isFriday,
-                    isWeekend = isWeekend,
-                    offMessage = Kalender.getDayOfJawa(LocalDate.of(year, month, day)), //javaDayOfWeek(LocalDate.of(year, month, day)),
-                    isHoliday = false
-                )
-            }
-        }
-    }
-}
-
-/* Kalender */
-@Composable
-fun ItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: Boolean, offMessage: String, isHoliday: Boolean) {
-    val backgroundColor = if(isSelected) {
-        if (isHoliday) {
-            FlatUiColors.GermanPallet.Desire.inverse()
-        } else {
-            FlatUiColors.GermanPallet.HighBlue
-        }
-    } else {
-        MaterialTheme.colorScheme.background
-    }
-
-    val textColor = if (isSelected) {
-        FlatUiColors.BasicPallete.LightenDark
-    } else if (isFriday) {
-        FlatUiColors.GermanPallet.ReptileGreen
-    } else if (isWeekend) {
-        FlatUiColors.GermanPallet.Desire
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    }
-
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .aspectRatio(1f)
-            .padding(4.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    color = backgroundColor, // Inner content color
-                    shape = RoundedCornerShape(50.dp) // Same radius as outer box
-                )
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = day.toString(),
-                    style = typography.labelLarge,
-                    color = textColor
-                )
-                Text(
-                    text = offMessage,
-                    style = typography.labelSmall,
-                    color = textColor
-                )
-                LazyRow {
-                }
-            }
-        }
+        KalenderWidget(innerPadding)
     }
 }
 
@@ -391,6 +294,6 @@ fun ItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: Boolea
 @Composable
 fun GreetingPreview() {
     AppTheme {
-        CalendarUI(PaddingValues(0.dp))
+        KalenderUI(PaddingValues(0.dp))
     }
 }
