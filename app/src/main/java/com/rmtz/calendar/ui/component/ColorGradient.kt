@@ -1,5 +1,6 @@
 package com.rmtz.calendar.ui.component
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Brush
@@ -7,6 +8,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RadialGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
+import com.rmtz.calendar.ui.theme.BaseDark
+import com.rmtz.calendar.ui.theme.BaseLight
+import com.rmtz.calendar.ui.theme.FlatUiColors
 import com.rmtz.calendar.ui.theme.malam1
 import com.rmtz.calendar.ui.theme.malam2
 import com.rmtz.calendar.ui.theme.pagi1
@@ -27,11 +31,6 @@ val nightGradient = Brush.horizontalGradient(
     )
 )
 
-/*#b5d6e0	(181,214,224)
-#c7e1e5	(199,225,229)
-#ffef7a	(255,239,122)
-#f7c16a	(247,193,106)
-#f46a55	(244,106,85)*/
 val shineGradient = Brush.horizontalGradient(
     colorStops = arrayOf(
         0.0f to pagi3,
@@ -40,6 +39,13 @@ val shineGradient = Brush.horizontalGradient(
         0.9f to siang2,
         1.0f to sore1
     )
+)
+val verticalDarkGradientTransparent = Brush.verticalGradient(
+    listOf(Color.Transparent,BaseDark.LightenDark)
+)
+
+val verticalLightGradientTransparent = Brush.verticalGradient(
+    listOf(Color.Transparent,BaseDark.BrokenWhite)
 )
 
 val largeRadialGradient = object : ShaderBrush() {

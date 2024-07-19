@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement.aligned
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,153 +42,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rmtz.calendar.libs.Kalender
 import com.rmtz.calendar.ui.component.ClockWidget
+import com.rmtz.calendar.ui.component.Container
 import com.rmtz.calendar.ui.component.KalenderWidget
 import com.rmtz.calendar.ui.component.nightGradient
+import com.rmtz.calendar.ui.component.roundedBottomCornerShape
 import com.rmtz.calendar.ui.component.shineGradient
+import com.rmtz.calendar.ui.component.verticalDarkGradientTransparent
+import com.rmtz.calendar.ui.component.verticalLightGradientTransparent
 import com.rmtz.calendar.ui.theme.AppTheme
 import com.rmtz.calendar.ui.theme.yellowTransient
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
-@Composable
-fun HalfCircleProgressBar(modifier: Modifier) {
-    var progress by remember { mutableFloatStateOf(0f) }
-    var startAngle by remember { mutableFloatStateOf(-180f) }
-    val iconSun = painterResource(id = R.drawable.ic_sun)
-    val iconMoon = painterResource(id = R.drawable.ic_moon)
-    var icon by remember { mutableStateOf(iconMoon) }
-    var colorProgress by remember { mutableStateOf(nightGradient) }
-    var colorCircle by remember { mutableStateOf(Color.LightGray) }
-
-    Box( modifier = modifier .background(Color.Transparent) ) {
-        Canvas(modifier) {
-            /* Base ProgressBar */
-            drawArc(
-                color = Color.LightGray,
-                startAngle = -180f,
-                sweepAngle = 180f,
-                useCenter = false,
-                size = Size(size.width, size.height * 2),
-                style = Stroke(8.dp.toPx(), cap = StrokeCap.Round)
-            )
-            /* Running Progress ProgressBar */
-            drawArc(
-                brush = colorProgress,
-                startAngle = startAngle,
-                sweepAngle = progress,
-                useCenter = false,
-                size = Size(size.width, size.height * 2),
-                style = Stroke(8.dp.toPx(), cap = StrokeCap.Round)
-            )
-
-            val iconSize = 24.dp.toPx()
-            val angleInRadians = Math.toRadians(-180.0 + progress.toDouble())
-            val iconX = (size.width / 2) + (size.width / 2) * Math.cos(angleInRadians).toFloat() - iconSize / 2
-            val iconY = (size.height) + (size.height) * Math.sin(angleInRadians).toFloat() - iconSize / 2
-            /* Draw Circle Point */
-            /*drawCircle(
-                color = colorCircle,
-                radius = 40f,
-                center = Offset(iconX+27f, iconY+26f)
-            )*/
-            /* Draw Icon top of Circle Point */
-            translate(left = iconX+8f, top = iconY) {
-                with(icon) {
-                    draw(
-                        size = Size(20.dp.toPx(), 20.dp.toPx())
-                    )
-                }
-            }
-        }
-        // Clock component is placed at the bottom center of the progress bar
-        ClockWidget(
-            modifier = Modifier
-                .align(alignment = Alignment.BottomCenter)
-                .padding(horizontal = 0.dp, vertical = 12.dp),
-            onUpdateProgress = {
-                progress = it
-                startAngle = -180f
-                Log.d("HalfCircleProgressBar", progress.toString())
-            },
-            onUpdateHour = {
-                if (it in 6..18) {
-                    colorProgress = shineGradient
-                    icon = iconSun
-                    colorCircle = yellowTransient
-                } else {
-                    colorProgress = nightGradient
-                    icon = iconMoon
-                    colorCircle = Color.LightGray
-                }
-            }
-        )
-    }
-}
-
-
-
-@SuppressLint("NewApi")
-@Composable
-fun HeaderUI(today: LocalDate) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier.fillMaxWidth(1f),
-        verticalArrangement = aligned(alignment = Alignment.CenterVertically)
-    ) {
-        item {
-            Column(Modifier.padding(16.dp)) {
-                Row {
-                    Text(
-                        text = today.format(DateTimeFormatter.ofPattern("dd")),
-                        style = typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.End,
-                        fontSize = 68.sp,
-                        modifier = Modifier.fillMaxHeight(1f)
-                    )
-                    Column {
-                        Text(
-                            text = today.format(DateTimeFormatter.ofPattern("MMMM")),
-                            style = typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            textAlign = TextAlign.End,
-                            fontSize = 32.sp,
-                            modifier = Modifier.fillMaxWidth(1f)
-                        )
-                        Text(
-                            text = today.format(DateTimeFormatter.ofPattern("YYYY")),
-                            style = typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            textAlign = TextAlign.End,
-                            fontSize = 27.sp,
-                            modifier = Modifier.fillMaxWidth(1f)
-                        )
-                    }
-                }
-                Text(
-                    text = today.format(DateTimeFormatter.ofPattern("YYYY")),
-                    style = typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    textAlign = TextAlign.Start,
-                    fontSize = 14.sp,
-                    modifier = Modifier.fillMaxWidth(1f)
-                )
-            }
-        }
-
-        item {
-            Box(modifier = Modifier.fillMaxWidth(1f)) {
-                HalfCircleProgressBar(modifier = Modifier
-                    .clipToBounds()
-                    .fillMaxWidth(1f)
-                    .height(145.dp)
-                    .padding(16.dp)
-                )
-            }
-        }
-    }
-}
 
 @SuppressLint("NewApi")
 @Composable
@@ -200,9 +66,22 @@ fun KalenderUI(innerPadding: PaddingValues) {
     val daysOfWeek = Kalender.getDaysInWeeks()
 
     /*Grid Layout*/
-    Column() {
-        HeaderUI(Kalender.getToday())
-        KalenderWidget(innerPadding)
+    Column {
+        Container(
+            Modifier
+                .padding(0.dp)
+                .background(
+                    brush = if (isSystemInDarkTheme()) {
+                        verticalDarkGradientTransparent
+                    } else {
+                        verticalLightGradientTransparent
+                    },
+                    shape = roundedBottomCornerShape
+                )
+        ) {
+            KalenderWidget()
+        }
+
     }
 }
 

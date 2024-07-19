@@ -119,7 +119,7 @@ fun ClockWidget(modifier: Modifier? = Modifier, onUpdateProgress: (Float) -> Uni
 
 @SuppressLint("NewApi")
 @Composable
-fun KalenderWidget(innerPadding: PaddingValues) {
+fun KalenderWidget() {
     val month = Kalender.getToday().month
     val year = Kalender.getToday().year
     val daysOfMonth = Kalender.getDatesOfMonth(year, month)
@@ -128,7 +128,7 @@ fun KalenderWidget(innerPadding: PaddingValues) {
     val daysOfWeek = Kalender.getDaysInWeeks()
 
     /*Grid Layout*/
-    Box(Modifier.padding(innerPadding)) {
+    Box(Modifier.padding(0.dp)) {
         Column() {
             Row(
                 modifier = Modifier
@@ -162,8 +162,7 @@ fun KalenderWidget(innerPadding: PaddingValues) {
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(7), // 7 columns for 7 days of the week
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(8.dp)
             ) {
                 repeat(startOffset) {
@@ -173,14 +172,16 @@ fun KalenderWidget(innerPadding: PaddingValues) {
                     val isSelected = LocalDate.of(year, month, day) == Kalender.getToday()
                     val isFriday = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SATURDAY
                     val isWeekend = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SUNDAY
-                    WidgetItemDate(
-                        day = day,
-                        isSelected = isSelected,
-                        isFriday = isFriday,
-                        isWeekend = isWeekend,
-                        offMessage = Kalender.getDayOfJawa(LocalDate.of(year, month, day)), //javaDayOfWeek(LocalDate.of(year, month, day)),
-                        isHoliday = false
-                    )
+                    Box(Modifier.padding(2.dp, 6.dp)) {
+                        WidgetItemDate(
+                            day = day,
+                            isSelected = isSelected,
+                            isFriday = isFriday,
+                            isWeekend = isWeekend,
+                            offMessage = Kalender.getDayOfJawa(LocalDate.of(year, month, day)), //javaDayOfWeek(LocalDate.of(year, month, day)),
+                            isHoliday = false
+                        )
+                    }
                 }
             }
         }
@@ -196,7 +197,7 @@ fun WidgetItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: 
             FlatUiColors.GermanPallet.HighBlue
         }
     } else {
-        MaterialTheme.colorScheme.background
+        Color.Transparent
     }
 
     val textColor = if (isSelected) {
@@ -209,37 +210,31 @@ fun WidgetItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: 
         MaterialTheme.colorScheme.onSurface
     }
 
-    Surface(
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .aspectRatio(1f)
-            .padding(4.dp)
+            .background(
+                color = backgroundColor, // Inner content color
+                shape = RoundedCornerShape(50.dp) // Same radius as outer box
+            )
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    color = backgroundColor, // Inner content color
-                    shape = RoundedCornerShape(50.dp) // Same radius as outer box
-                )
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = day.toString(),
-                    style = typography.labelLarge,
-                    color = textColor
-                )
-                Text(
-                    text = offMessage,
-                    style = typography.labelSmall,
-                    color = textColor
-                )
-                LazyRow {
-                }
+            Text(
+                text = day.toString(),
+                style = typography.labelLarge,
+                color = textColor
+            )
+            Text(
+                text = offMessage,
+                style = typography.labelSmall,
+                color = textColor
+            )
+            LazyRow {
             }
         }
     }
@@ -256,9 +251,6 @@ fun WidgetItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: 
 @Composable
 fun GreetingPreview() {
     AppTheme {
-        ClockWidget(
-            onUpdateProgress = {},
-            onUpdateHour = {}
-        )
+        KalenderWidget()
     }
 }

@@ -26,8 +26,8 @@ import androidx.compose.ui.unit.dp
 import com.rmtz.calendar.ui.theme.AppTheme
 
 val roundedTopCornerShape = RoundedCornerShape(
-    topStart = 8.dp,
-    topEnd = 8.dp,
+    topStart = 12.dp,
+    topEnd = 12.dp,
     bottomStart = 0.dp,
     bottomEnd = 0.dp
 )
@@ -35,15 +35,15 @@ val roundedTopCornerShape = RoundedCornerShape(
 val roundedBottomCornerShape = RoundedCornerShape(
     topStart = 0.dp,
     topEnd = 0.dp,
-    bottomStart = 8.dp,
-    bottomEnd = 8.dp
+    bottomStart = 12.dp,
+    bottomEnd = 12.dp
 )
 
 val roundedCornerShape = RoundedCornerShape(
-    topStart = 8.dp,
-    topEnd = 8.dp,
-    bottomStart = 8.dp,
-    bottomEnd = 8.dp
+    topStart = 12.dp,
+    topEnd = 12.dp,
+    bottomStart = 12.dp,
+    bottomEnd = 12.dp
 )
 
 @Composable
@@ -61,9 +61,9 @@ fun Container(modifier: Modifier? = Modifier, content: @Composable () -> Unit? =
     }!!
 
     Box(modifier = combinedModifier, content = {
-        Box(modifier = Modifier.padding(16.dp,24.dp), content = {
-            Text(text = "Hello World")
-        })
+        Box(modifier = Modifier.padding(16.dp,24.dp)){
+            content()
+        }
     })
 }
 

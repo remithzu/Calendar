@@ -73,7 +73,7 @@ fun TemplateUI() {
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetShape = roundedTopCornerShape,
-        sheetPeekHeight = 95.dp,
+        //sheetPeekHeight = 95.dp,
         sheetContent = {
             Column(
                 modifier = Modifier
