@@ -1,6 +1,9 @@
 package com.rmtz.calendar.ui.component
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
+import android.icu.util.Calendar
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,16 +25,97 @@ import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.rmtz.calendar.KalenderUI
 import com.rmtz.calendar.libs.Kalender
 import com.rmtz.calendar.libs.toHari
+import com.rmtz.calendar.ui.theme.AppTheme
 import com.rmtz.calendar.ui.theme.FlatUiColors
 import com.rmtz.calendar.ui.theme.FlatUiColors.inverse
+import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.util.Date
+import java.util.Locale
+import kotlin.math.abs
+
+
+@Composable
+fun ClockWidget(modifier: Modifier? = Modifier, onUpdateProgress: (Float) -> Unit, onUpdateHour: (Int) -> Unit) {
+    var currentTime by remember { mutableStateOf(Date()) }
+    val updateTimeMillis = 1000L
+    val updateProgressMillis = 1000 * 60L
+
+    val combinedModifier = if (modifier == Modifier) {
+        Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    } else {
+        modifier
+    }!!
+
+    LaunchedEffect(true) {
+        while (true) {
+            currentTime = Calendar.getInstance().time
+            delay(updateTimeMillis)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            val calendar = Calendar.getInstance()
+            val currentHour = calendar.get(Calendar.HOUR_OF_DAY) % 24
+            val currentMinute = calendar.get(Calendar.MINUTE)
+            Log.d("Clock", "currentHour: $currentHour, currentMinute: $currentMinute")
+
+            val elapsedMinutes = (currentHour - 6) * 60 + currentMinute
+            val totalMinutes = 12 * 60
+            val calcDegrees = abs((elapsedMinutes.toFloat() / totalMinutes.toFloat()) * 180f)
+            var degrees = 0f
+            Log.d("Clock Degree", calcDegrees.toString())
+
+            if (currentHour in 6..18) {
+                degrees = calcDegrees
+            } else {
+                degrees = calcDegrees - 180f
+            }
+            if (degrees >= 180f) degrees = 180f
+
+            Log.d("Clock currentHour", currentHour.toString())
+            Log.d("Clock Degree", degrees.toString())
+            onUpdateProgress(abs(degrees))
+            onUpdateHour(currentHour)
+
+            delay(updateProgressMillis)
+        }
+    }
+
+    Column(
+        modifier = combinedModifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(currentTime),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = 20.sp
+        )
+    }
+}
 
 @SuppressLint("NewApi")
 @Composable
@@ -158,5 +242,23 @@ fun WidgetItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: 
                 }
             }
         }
+    }
+}
+
+@Preview(
+    name = "Light Mode",
+    uiMode = Configuration.UI_MODE_NIGHT_NO,
+    showBackground = true,
+    device = Devices.PIXEL_4_XL,
+    showSystemUi = true
+)
+
+@Composable
+fun GreetingPreview() {
+    AppTheme {
+        ClockWidget(
+            onUpdateProgress = {},
+            onUpdateHour = {}
+        )
     }
 }

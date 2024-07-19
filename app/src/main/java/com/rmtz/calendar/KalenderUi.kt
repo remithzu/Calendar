@@ -2,36 +2,24 @@ package com.rmtz.calendar
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import android.icu.util.Calendar
 import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.aligned
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Shapes
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,13 +28,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
@@ -54,23 +40,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rmtz.calendar.libs.Kalender
-import com.rmtz.calendar.libs.toHari
+import com.rmtz.calendar.ui.component.ClockWidget
 import com.rmtz.calendar.ui.component.KalenderWidget
 import com.rmtz.calendar.ui.component.nightGradient
-import com.rmtz.calendar.ui.component.roundedCornerShape
 import com.rmtz.calendar.ui.component.shineGradient
 import com.rmtz.calendar.ui.theme.AppTheme
-import com.rmtz.calendar.ui.theme.FlatUiColors
-import com.rmtz.calendar.ui.theme.FlatUiColors.inverse
 import com.rmtz.calendar.ui.theme.yellowTransient
-import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.Date
-import java.util.Locale
-import kotlin.math.abs
 
 @Composable
 fun HalfCircleProgressBar(modifier: Modifier) {
@@ -123,7 +101,7 @@ fun HalfCircleProgressBar(modifier: Modifier) {
             }
         }
         // Clock component is placed at the bottom center of the progress bar
-        Clock(
+        ClockWidget(
             modifier = Modifier
                 .align(alignment = Alignment.BottomCenter)
                 .padding(horizontal = 0.dp, vertical = 12.dp),
@@ -147,62 +125,7 @@ fun HalfCircleProgressBar(modifier: Modifier) {
     }
 }
 
-@Composable
-fun Clock(modifier: Modifier, onUpdateProgress: (Float) -> Unit, onUpdateHour: (Int) -> Unit) {
-    var currentTime by remember { mutableStateOf(Date()) }
 
-    val updateTimeMillis = 1000L // Update current time every second
-    val updateProgressMillis = 1000 * 60L // Update progress every minute
-
-    LaunchedEffect(true) {
-        while (true) {
-            currentTime = Calendar.getInstance().time
-            delay(updateTimeMillis)
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            val calendar = Calendar.getInstance()
-            val currentHour = calendar.get(Calendar.HOUR_OF_DAY) % 24
-            val currentMinute = calendar.get(Calendar.MINUTE)
-            Log.d("Clock", "currentHour: $currentHour, currentMinute: $currentMinute")
-
-            val elapsedMinutes = (currentHour - 6) * 60 + currentMinute
-            val totalMinutes = 12 * 60
-            val calcDegrees = abs((elapsedMinutes.toFloat() / totalMinutes.toFloat()) * 180f)
-            var degrees = 0f
-            Log.d("Clock Degree", calcDegrees.toString())
-
-            if (currentHour in 6..18) {
-                degrees = calcDegrees
-            } else {
-                degrees = calcDegrees - 180f
-            }
-            if (degrees >= 180f) degrees = 180f
-
-            Log.d("Clock currentHour", currentHour.toString())
-            Log.d("Clock Degree", degrees.toString())
-            onUpdateProgress(abs(degrees))
-            onUpdateHour(currentHour)
-
-            delay(updateProgressMillis)
-        }
-    }
-
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(currentTime),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontSize = 20.sp
-        )
-    }
-}
 
 @SuppressLint("NewApi")
 @Composable
