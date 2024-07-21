@@ -41,11 +41,11 @@ val shineGradient = Brush.horizontalGradient(
     )
 )
 val verticalDarkGradientTransparent = Brush.verticalGradient(
-    listOf(Color.Transparent,BaseDark.LightenDark)
+    listOf(Color.Transparent,Color.Transparent,BaseDark.LightenDark)
 )
 
 val verticalLightGradientTransparent = Brush.verticalGradient(
-    listOf(Color.Transparent,BaseDark.BrokenWhite)
+    listOf(Color.Transparent,Color.Transparent,BaseDark.BrokenWhite)
 )
 
 val largeRadialGradient = object : ShaderBrush() {

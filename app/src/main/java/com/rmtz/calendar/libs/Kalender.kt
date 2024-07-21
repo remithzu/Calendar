@@ -3,6 +3,7 @@ package com.rmtz.calendar.libs
 import android.annotation.SuppressLint
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.Month
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
@@ -40,6 +41,16 @@ class Kalender {
         @SuppressLint("NewApi")
         fun getDaysInWeeks(): List<String> {
             return DayOfWeek.entries.map { it.getDisplayName(TextStyle.SHORT, Locale.getDefault()) }
+        }
+
+        @SuppressLint("NewApi")
+        fun previousMonth(month: Month): Month {
+            return month-1
+        }
+
+        @SuppressLint("NewApi")
+        fun nextMonth(month: Month): Month {
+            return month+1
         }
     }
 }

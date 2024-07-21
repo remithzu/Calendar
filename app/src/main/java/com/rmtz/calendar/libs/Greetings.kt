@@ -2,7 +2,7 @@ package com.rmtz.calendar.libs
 
 class Greetings {
     companion object {
-        public fun generate(): String {
+        fun Generate(): String {
             val greetings = listOf(
                 "guten Tag",
                 "good evening",
@@ -51,7 +51,10 @@ class Greetings {
                 "wassap?",
                 "yo"
             )
+            return greetings.random()
+        }
 
+        fun Quote(): String {
             val topics = listOf(
                 "Neon swords dance in the cool blue abyss",
                 "Where a cyberpunk samurai finds his silent bliss",
@@ -102,7 +105,7 @@ class Greetings {
                 "In a world of steel and code, it finds its place",
                 "A beacon of warmth in the cold embrace"
             )
-            return "<b>${greetings.random()}</b>\n${topics.random()}"
+            return topics.random()
         }
     }
 }

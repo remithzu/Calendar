@@ -48,6 +48,7 @@ import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.Month
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
@@ -119,9 +120,7 @@ fun ClockWidget(modifier: Modifier? = Modifier, onUpdateProgress: (Float) -> Uni
 
 @SuppressLint("NewApi")
 @Composable
-fun KalenderWidget() {
-    val month = Kalender.getToday().month
-    val year = Kalender.getToday().year
+fun KalenderWidget(month: Month, year: Int) {
     val daysOfMonth = Kalender.getDatesOfMonth(year, month)
     val firstDayOfMonth = Kalender.getDayInFirstMonth(year, month)
     val startOffset = if (firstDayOfMonth == DayOfWeek.MONDAY) 0 else firstDayOfMonth.value - 1
@@ -133,14 +132,14 @@ fun KalenderWidget() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
+                    .padding(horizontal = 0.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 daysOfWeek.forEach { day ->
                     Box(
                         Modifier
-                            .padding(3.dp)
+                            .padding(8.dp)
                             .weight(1f)
                             .background(
                                 color = FlatUiColors.GermanPallet.NycTaxi,
@@ -240,6 +239,7 @@ fun WidgetItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: 
     }
 }
 
+@SuppressLint("NewApi")
 @Preview(
     name = "Light Mode",
     uiMode = Configuration.UI_MODE_NIGHT_NO,
@@ -251,6 +251,6 @@ fun WidgetItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: 
 @Composable
 fun GreetingPreview() {
     AppTheme {
-        KalenderWidget()
+        KalenderWidget(Month.JULY, 2024)
     }
 }

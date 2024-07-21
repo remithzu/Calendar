@@ -20,9 +20,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.rmtz.calendar.ui.theme.AppTheme
 
 val roundedTopCornerShape = RoundedCornerShape(
@@ -51,7 +53,7 @@ fun Container(modifier: Modifier? = Modifier, content: @Composable () -> Unit? =
     val combinedModifier = if (modifier == Modifier) {
         Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(0.dp)
             .background(
                 color = Color.LightGray,
                 shape = roundedCornerShape
@@ -61,22 +63,209 @@ fun Container(modifier: Modifier? = Modifier, content: @Composable () -> Unit? =
     }!!
 
     Box(modifier = combinedModifier, content = {
-        Box(modifier = Modifier.padding(16.dp,24.dp)){
+        Box(modifier = Modifier.padding(16.dp,14.dp)){
             content()
         }
     })
 }
 
+
+@Composable
+fun TextSmall(modifier: Modifier? = Modifier, text: String ) {
+    val combinedModifier = if (modifier == Modifier) {
+        Modifier.padding(0.dp)
+    } else {
+        modifier
+    }!!
+
+    Text(
+        text = text,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Light,
+        modifier = combinedModifier
+    )
+}
+
+@Composable
+fun TextNormal(modifier: Modifier? = Modifier, text: String ) {
+    val combinedModifier = if (modifier == Modifier) {
+        Modifier.padding(0.dp)
+    } else {
+        modifier
+    }!!
+
+    Text(
+        text = text,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.Normal,
+        modifier = combinedModifier
+    )
+}
+
+@Composable
+fun TextMedium(modifier: Modifier? = Modifier, text: String ) {
+    val combinedModifier = if (modifier == Modifier) {
+        Modifier.padding(0.dp)
+    } else {
+        modifier
+    }!!
+
+    Text(
+        text = text,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Normal,
+        modifier = combinedModifier
+    )
+}
+
+@Composable
+fun TextLarge(modifier: Modifier? = Modifier, text: String ) {
+    val combinedModifier = if (modifier == Modifier) {
+        Modifier.padding(0.dp)
+    } else {
+        modifier
+    }!!
+
+    Text(
+        text = text,
+        fontSize = 28.sp,
+        fontWeight = FontWeight.SemiBold,
+        modifier = combinedModifier
+    )
+}
+
+@Composable
+fun TextSmallThin(modifier: Modifier? = Modifier, text: String ) {
+    val combinedModifier = if (modifier == Modifier) {
+        Modifier.padding(0.dp)
+    } else {
+        modifier
+    }!!
+
+    Text(
+        text = text,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Thin,
+        modifier = combinedModifier
+    )
+}
+
+@Composable
+fun TextNormalThin(modifier: Modifier? = Modifier, text: String ) {
+    val combinedModifier = if (modifier == Modifier) {
+        Modifier.padding(0.dp)
+    } else {
+        modifier
+    }!!
+
+    Text(
+        text = text,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.Thin,
+        modifier = combinedModifier
+    )
+}
+
+@Composable
+fun TextMediumThin(modifier: Modifier? = Modifier, text: String ) {
+    val combinedModifier = if (modifier == Modifier) {
+        Modifier.padding(0.dp)
+    } else {
+        modifier
+    }!!
+
+    Text(
+        text = text,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Thin,
+        modifier = combinedModifier
+    )
+}
+
+@Composable
+fun TextLargeThin(modifier: Modifier? = Modifier, text: String ) {
+    val combinedModifier = if (modifier == Modifier) {
+        Modifier.padding(0.dp)
+    } else {
+        modifier
+    }!!
+
+    Text(
+        text = text,
+        fontSize = 28.sp,
+        fontWeight = FontWeight.Thin,
+        modifier = combinedModifier
+    )
+}
+
+@Composable
+fun TextSmallBold(modifier: Modifier? = Modifier, text: String ) {
+    val combinedModifier = if (modifier == Modifier) {
+        Modifier.padding(0.dp)
+    } else {
+        modifier
+    }!!
+
+    Text(
+        text = text,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = combinedModifier
+    )
+}
+
+@Composable
+fun TextNormalBold(modifier: Modifier? = Modifier, text: String ) {
+    val combinedModifier = if (modifier == Modifier) {
+        Modifier.padding(0.dp)
+    } else {
+        modifier
+    }!!
+
+    Text(
+        text = text,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = combinedModifier
+    )
+}
+
+@Composable
+fun TextMediumBold(modifier: Modifier? = Modifier, text: String ) {
+    val combinedModifier = if (modifier == Modifier) {
+        Modifier.padding(0.dp)
+    } else {
+        modifier
+    }!!
+
+    Text(
+        text = text,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = combinedModifier
+    )
+}
+
+@Composable
+fun TextLargeBold(modifier: Modifier? = Modifier, text: String ) {
+    val combinedModifier = if (modifier == Modifier) {
+        Modifier.padding(0.dp)
+    } else {
+        modifier
+    }!!
+
+    Text(
+        text = text,
+        fontSize = 28.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = combinedModifier
+    )
+}
+
+
 @Composable
 fun TestUI() {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2), // 7 columns for 7 days of the week
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(8.dp)
-    ) {
-        item { Container() }
-        item { Container() }
-    }
+    Container()
 }
 
 @Preview(
