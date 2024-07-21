@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,9 +37,9 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rmtz.calendar.KalenderUI
 import com.rmtz.calendar.libs.Kalender
 import com.rmtz.calendar.libs.toHari
+import com.rmtz.calendar.model.Holiday
 import com.rmtz.calendar.ui.theme.AppTheme
 import com.rmtz.calendar.ui.theme.FlatUiColors
 import com.rmtz.calendar.ui.theme.FlatUiColors.inverse
@@ -171,6 +170,8 @@ fun KalenderWidget(month: Month, year: Int) {
                     val isSelected = LocalDate.of(year, month, day) == Kalender.getToday()
                     val isFriday = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SATURDAY
                     val isWeekend = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SUNDAY
+                    val holiday = Kalender.getHoliday(LocalDate.of(year, month, day))
+                    Log.d("Holiday", "${holiday}")
                     Box(Modifier.padding(2.dp, 6.dp)) {
                         WidgetItemDate(
                             day = day,
@@ -178,7 +179,7 @@ fun KalenderWidget(month: Month, year: Int) {
                             isFriday = isFriday,
                             isWeekend = isWeekend,
                             offMessage = Kalender.getDayOfJawa(LocalDate.of(year, month, day)), //javaDayOfWeek(LocalDate.of(year, month, day)),
-                            isHoliday = false
+                            isHoliday = holiday
                         )
                     }
                 }
@@ -188,18 +189,15 @@ fun KalenderWidget(month: Month, year: Int) {
 }
 
 @Composable
-fun WidgetItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: Boolean, offMessage: String, isHoliday: Boolean) {
-    val backgroundColor = if(isSelected) {
-        if (isHoliday) {
-            FlatUiColors.GermanPallet.Desire.inverse()
-        } else {
-            FlatUiColors.GermanPallet.HighBlue
-        }
+fun WidgetItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: Boolean, offMessage: String, isHoliday: Holiday?) {
+    var backgroundColor = if(isSelected) {
+        FlatUiColors.GermanPallet.HighBlue
     } else {
         Color.Transparent
     }
+    if (isHoliday!=null) backgroundColor = FlatUiColors.GermanPallet.Desire.inverse()
 
-    val textColor = if (isSelected) {
+    var textColor = if (isSelected) {
         FlatUiColors.BasicPallete.LightenDark
     } else if (isFriday) {
         FlatUiColors.GermanPallet.ReptileGreen
@@ -208,6 +206,7 @@ fun WidgetItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: 
     } else {
         MaterialTheme.colorScheme.onSurface
     }
+    if (isHoliday!=null) textColor = MaterialTheme.colorScheme.onSurface
 
     Box(
         modifier = Modifier

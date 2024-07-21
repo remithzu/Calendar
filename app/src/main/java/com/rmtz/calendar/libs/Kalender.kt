@@ -1,6 +1,7 @@
 package com.rmtz.calendar.libs
 
 import android.annotation.SuppressLint
+import com.rmtz.calendar.model.Holiday
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Month
@@ -51,6 +52,21 @@ class Kalender {
         @SuppressLint("NewApi")
         fun nextMonth(month: Month): Month {
             return month+1
+        }
+
+        @SuppressLint("NewApi")
+        fun getFixedHolidays(): List<Holiday> {
+            return listOf(
+                Holiday("Tahun Baru Masehi", 1, Month.JANUARY),
+                Holiday("Hari Kemerdekaan Indonesia", 17, Month.AUGUST),
+                Holiday("Hari Raya Natal", 25, Month.DECEMBER)
+            )
+        }
+
+        @SuppressLint("NewApi")
+        fun getHoliday(date: LocalDate): Holiday? {
+            val holidays = getFixedHolidays()
+            return holidays.find { it.month == date.month && it.day == date.dayOfMonth }
         }
     }
 }
