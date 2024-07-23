@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.icu.util.Calendar
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,8 +13,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -32,14 +35,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rmtz.calendar.libs.Kalender
 import com.rmtz.calendar.libs.toHari
-import com.rmtz.calendar.model.Holiday
 import com.rmtz.calendar.ui.theme.AppTheme
 import com.rmtz.calendar.ui.theme.FlatUiColors
 import com.rmtz.calendar.ui.theme.FlatUiColors.inverse
@@ -124,6 +129,7 @@ fun KalenderWidget(month: Month, year: Int) {
     val firstDayOfMonth = Kalender.getDayInFirstMonth(year, month)
     val startOffset = if (firstDayOfMonth == DayOfWeek.MONDAY) 0 else firstDayOfMonth.value - 1
     val daysOfWeek = Kalender.getDaysInWeeks()
+    val clickedDate by remember { mutableStateOf(Kalender.getToday())}
 
     /*Grid Layout*/
     Box(Modifier.padding(0.dp)) {
@@ -170,16 +176,17 @@ fun KalenderWidget(month: Month, year: Int) {
                     val isSelected = LocalDate.of(year, month, day) == Kalender.getToday()
                     val isFriday = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SATURDAY
                     val isWeekend = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SUNDAY
-                    val holiday = Kalender.getHoliday(LocalDate.of(year, month, day))
-                    Log.d("Holiday", "${holiday}")
+                    Log.d("Hijri", Kalender.getHijriDate(LocalDate.of(year, month, day)).toString())
                     Box(Modifier.padding(2.dp, 6.dp)) {
                         WidgetItemDate(
-                            day = day,
+                            date = LocalDate.of(year, month, day),
                             isSelected = isSelected,
                             isFriday = isFriday,
                             isWeekend = isWeekend,
                             offMessage = Kalender.getDayOfJawa(LocalDate.of(year, month, day)), //javaDayOfWeek(LocalDate.of(year, month, day)),
-                            isHoliday = holiday
+                            isHoliday = Kalender.isHoliday(LocalDate.of(year, month, day)),
+                            onClick = {
+                            }
                         )
                     }
                 }
@@ -188,14 +195,23 @@ fun KalenderWidget(month: Month, year: Int) {
     }
 }
 
+@SuppressLint("NewApi")
 @Composable
-fun WidgetItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: Boolean, offMessage: String, isHoliday: Holiday?) {
+fun WidgetItemDate(
+    date: LocalDate,
+    isSelected: Boolean,
+    isFriday: Boolean,
+    isWeekend: Boolean,
+    offMessage: String,
+    isHoliday: Boolean,
+    onClick: (LocalDate) -> Unit?
+) {
     var backgroundColor = if(isSelected) {
-        FlatUiColors.GermanPallet.HighBlue
+        if (isHoliday) FlatUiColors.GermanPallet.Desire.inverse()
+        else FlatUiColors.GermanPallet.HighBlue
     } else {
         Color.Transparent
     }
-    if (isHoliday!=null) backgroundColor = FlatUiColors.GermanPallet.Desire.inverse()
 
     var textColor = if (isSelected) {
         FlatUiColors.BasicPallete.LightenDark
@@ -206,7 +222,7 @@ fun WidgetItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: 
     } else {
         MaterialTheme.colorScheme.onSurface
     }
-    if (isHoliday!=null) textColor = MaterialTheme.colorScheme.onSurface
+    if (isHoliday) textColor = FlatUiColors.GermanPallet.Desire
 
     Box(
         modifier = Modifier
@@ -216,6 +232,9 @@ fun WidgetItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: 
                 color = backgroundColor, // Inner content color
                 shape = RoundedCornerShape(50.dp) // Same radius as outer box
             )
+            .clickable {
+                onClick(date)
+            }
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -223,17 +242,30 @@ fun WidgetItemDate(day: Int, isSelected: Boolean, isFriday: Boolean, isWeekend: 
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = day.toString(),
-                style = typography.labelLarge,
-                color = textColor
+                buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            color = textColor,
+                            fontSize = 16.sp,
+                        )
+                    ) {
+                        append(date.dayOfMonth.toString())
+                    }
+                    withStyle(
+                        style = SpanStyle(
+                            color = if (isSelected) textColor else FlatUiColors.GermanPallet.ReptileGreen,
+                            fontSize = 6.sp,
+                        )
+                    ) {
+                        append(Kalender.getHijriDate(date).day.toString())
+                    }
+                }
             )
             Text(
                 text = offMessage,
                 style = typography.labelSmall,
                 color = textColor
             )
-            LazyRow {
-            }
         }
     }
 }
