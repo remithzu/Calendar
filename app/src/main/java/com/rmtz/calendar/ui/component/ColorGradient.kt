@@ -48,6 +48,22 @@ val verticalLightGradientTransparent = Brush.verticalGradient(
     listOf(Color.Transparent,Color.Transparent,BaseDark.BrokenWhite)
 )
 
+val horizontalStartDarkGradientTransparent = Brush.horizontalGradient(
+    listOf(BaseDark.LightenDark,Color.Transparent,Color.Transparent)
+)
+
+val horizontalStartLightGradientTransparent = Brush.horizontalGradient(
+    listOf(BaseDark.BrokenWhite,Color.Transparent,Color.Transparent)
+)
+
+val horizontalEndDarkGradientTransparent = Brush.horizontalGradient(
+    listOf(Color.Transparent,Color.Transparent,BaseDark.LightenDark)
+)
+
+val horizontalEndLightGradientTransparent = Brush.horizontalGradient(
+    listOf(Color.Transparent,Color.Transparent,BaseDark.BrokenWhite)
+)
+
 val largeRadialGradient = object : ShaderBrush() {
     override fun createShader(size: Size): Shader {
         val biggerDimension = maxOf(size.height, size.width)

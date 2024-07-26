@@ -13,17 +13,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,6 +50,7 @@ import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Month
+import java.time.Year
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
@@ -89,13 +87,13 @@ fun ClockWidget(modifier: Modifier? = Modifier, onUpdateProgress: (Float) -> Uni
             val elapsedMinutes = (currentHour - 6) * 60 + currentMinute
             val totalMinutes = 12 * 60
             val calcDegrees = abs((elapsedMinutes.toFloat() / totalMinutes.toFloat()) * 180f)
-            var degrees = 0f
+            var degrees: Float
             Log.d("Clock Degree", calcDegrees.toString())
 
-            if (currentHour in 6..18) {
-                degrees = calcDegrees
+            degrees = if (currentHour in 6..18) {
+                calcDegrees
             } else {
-                degrees = calcDegrees - 180f
+                calcDegrees - 180f
             }
             if (degrees >= 180f) degrees = 180f
 
@@ -115,8 +113,8 @@ fun ClockWidget(modifier: Modifier? = Modifier, onUpdateProgress: (Float) -> Uni
     ) {
         Text(
             text = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(currentTime),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+            style = typography.labelMedium,
+            color = colorScheme.onSurface,
             fontSize = 20.sp
         )
     }
@@ -124,16 +122,15 @@ fun ClockWidget(modifier: Modifier? = Modifier, onUpdateProgress: (Float) -> Uni
 
 @SuppressLint("NewApi")
 @Composable
-fun KalenderWidget(month: Month, year: Int) {
-    val daysOfMonth = Kalender.getDatesOfMonth(year, month)
-    val firstDayOfMonth = Kalender.getDayInFirstMonth(year, month)
+fun KalenderWidget(month: Month, year: Int, onClick: (LocalDate) -> Unit = {}) {
+    val daysOfMonth = Kalender.getDatesOfMonth(Year.of(year), month)
+    val firstDayOfMonth = Kalender.getDayInFirstMonth(Year.of(year), month)
     val startOffset = if (firstDayOfMonth == DayOfWeek.MONDAY) 0 else firstDayOfMonth.value - 1
     val daysOfWeek = Kalender.getDaysInWeeks()
-    val clickedDate by remember { mutableStateOf(Kalender.getToday())}
 
     /*Grid Layout*/
     Box(Modifier.padding(0.dp)) {
-        Column() {
+        Column {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -172,11 +169,10 @@ fun KalenderWidget(month: Month, year: Int) {
                 repeat(startOffset) {
                     item { Spacer(modifier = Modifier.aspectRatio(1f)) }
                 }
-                itemsIndexed(daysOfMonth) { index, day ->
+                itemsIndexed(daysOfMonth) { _, day ->
                     val isSelected = LocalDate.of(year, month, day) == Kalender.getToday()
                     val isFriday = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SATURDAY
                     val isWeekend = LocalDate.of(year, month, day).dayOfWeek == DayOfWeek.SUNDAY
-                    Log.d("Hijri", Kalender.getHijriDate(LocalDate.of(year, month, day)).toString())
                     Box(Modifier.padding(2.dp, 6.dp)) {
                         WidgetItemDate(
                             date = LocalDate.of(year, month, day),
@@ -184,10 +180,11 @@ fun KalenderWidget(month: Month, year: Int) {
                             isFriday = isFriday,
                             isWeekend = isWeekend,
                             offMessage = Kalender.getDayOfJawa(LocalDate.of(year, month, day)), //javaDayOfWeek(LocalDate.of(year, month, day)),
-                            isHoliday = Kalender.isHoliday(LocalDate.of(year, month, day)),
-                            onClick = {
-                            }
-                        )
+                            isHoliday = Kalender.isHoliday(LocalDate.of(year, month, day))
+                        ) { onClick ->
+                            onClick(onClick)
+                            Log.d("DateListener", "Date: ${onClick.dayOfMonth}, ${onClick.month.name} - ${onClick.year}")
+                        }
                     }
                 }
             }
@@ -204,9 +201,9 @@ fun WidgetItemDate(
     isWeekend: Boolean,
     offMessage: String,
     isHoliday: Boolean,
-    onClick: (LocalDate) -> Unit?
+    onClick: (LocalDate) -> Unit = {}
 ) {
-    var backgroundColor = if(isSelected) {
+    val backgroundColor = if(isSelected) {
         if (isHoliday) FlatUiColors.GermanPallet.Desire.inverse()
         else FlatUiColors.GermanPallet.HighBlue
     } else {
@@ -220,7 +217,7 @@ fun WidgetItemDate(
     } else if (isWeekend) {
         FlatUiColors.GermanPallet.Desire
     } else {
-        MaterialTheme.colorScheme.onSurface
+        colorScheme.onSurface
     }
     if (isHoliday) textColor = FlatUiColors.GermanPallet.Desire
 

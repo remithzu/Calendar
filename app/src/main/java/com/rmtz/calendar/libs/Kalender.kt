@@ -2,11 +2,11 @@ package com.rmtz.calendar.libs
 
 import android.annotation.SuppressLint
 import com.rmtz.calendar.model.HijriDate
-import com.rmtz.calendar.model.Holiday
+import com.rmtz.calendar.model.Event
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Month
-import java.time.chrono.HijrahChronology
+import java.time.Year
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -33,13 +33,13 @@ class Kalender {
         }
 
         @SuppressLint("NewApi")
-        fun getDatesOfMonth(year: Int, month: java.time.Month): List<Int> {
-            return (1..month.length(LocalDate.of(year, month, 1).isLeapYear)).toList()
+        fun getDatesOfMonth(year: Year, month: Month): List<Int> {
+            return (1..month.length(LocalDate.of(year.value, month, 1).isLeapYear)).toList()
         }
 
         @SuppressLint("NewApi")
-        fun getDayInFirstMonth(year: Int, month: java.time.Month): DayOfWeek {
-            return LocalDate.of(year, month, 1).dayOfWeek
+        fun getDayInFirstMonth(year: Year, month: java.time.Month): DayOfWeek {
+            return LocalDate.of(year.value, month, 1).dayOfWeek
         }
 
         @SuppressLint("NewApi")
@@ -79,31 +79,45 @@ class Kalender {
         }
 
         @SuppressLint("NewApi")
-        fun getHoliday(date: LocalDate): List<Holiday> {
-            val list = ArrayList<Holiday>()
-            listMasehiHoliday().forEach {
-                if ( date.dayOfMonth == it.second && date.monthValue == it.third) {
-                    list.add(Holiday(
-                        date = date,
+        fun getHoliday(date: LocalDate): List<Event> {
+            val list = ArrayList<Event>()
+            val masehiHoliday = listMasehiHoliday()
+            masehiHoliday.forEach {
+                if (date.month.value == it.third && date.dayOfMonth == it.second) {
+                    list.add(Event(
+                        date = LocalDate.of(date.year, it.third, it.second),
                         holiday = it.first,
                         day = it.second,
                         month = it.third,
-                        monthName = date.month.getDisplayName(TextStyle.SHORT, Locale("id")),
+                        monthName = Month.of(it.third).getDisplayName(TextStyle.SHORT, Locale("id")),
                         year = date.year
                     ))
                 }
             }
 
-            listHijriHoliday().forEach {
-                if ( getHijriDate(date).day == it.second && getHijriDate(date).month == it.third) {
-                    list.add(Holiday(
+            val hijriHoliday = listHijriHoliday()
+            hijriHoliday.forEach {
+                if (getHijriDate(LocalDate.of(date.year, date.month, date.dayOfMonth)).day == it.second && getHijriDate(LocalDate.of(date.year, date.month, date.dayOfMonth)).month == it.third) {
+                    list.add(Event(
                         date = date,
                         holiday = it.first,
                         day = it.second,
                         month = it.third,
-                        monthName = getHijriDate(date).monthName,
-                        year = getHijriDate(date).year
+                        monthName = getHijriDate(LocalDate.of(date.year, date.month, date.dayOfMonth)).monthName,
+                        year = getHijriDate(LocalDate.of(date.year, date.month, date.dayOfMonth)).year,
                     ))
+                }
+            }
+            return list
+        }
+
+        @SuppressLint("NewApi")
+        fun getHoliday(year: Year, month: Month): List<Event> {
+            val list = ArrayList<Event>()
+            getDatesOfMonth(year, month).forEach {
+                val holidays = getHoliday(LocalDate.of(year.value, month, it))
+                if (holidays.isNotEmpty()) {
+                    list.addAll(holidays)
                 }
             }
             return list

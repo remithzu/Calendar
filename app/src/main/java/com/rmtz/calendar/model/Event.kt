@@ -2,7 +2,7 @@ package com.rmtz.calendar.model
 
 import java.time.LocalDate
 
-data class Holiday(
+data class Event(
     val date: LocalDate,
     val holiday: String,
     val day: Int,

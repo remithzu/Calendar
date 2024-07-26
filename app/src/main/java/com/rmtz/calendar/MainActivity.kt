@@ -6,11 +6,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -32,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import com.rmtz.calendar.ui.component.roundedTopCornerShape
 import com.rmtz.calendar.ui.theme.AppTheme
 import com.rmtz.calendar.ui.theme.FlatUiColors
@@ -50,7 +47,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = FlatUiColors.CanadianPallet.WildCaribbeanGreen
                 ) {
-                    TemplateUI()
+                    ContentUI()
                 }
             }
         }
@@ -60,7 +57,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplateUI() {
-    val snackbarHostState = remember { SnackbarHostState() }
+
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
     val bottomSheetState = rememberModalBottomSheetState(true)
@@ -89,25 +86,35 @@ fun TemplateUI() {
             }
         },
         content = {
-            Scaffold(
-                snackbarHost = { SnackbarHost(snackbarHostState) },
-                floatingActionButton = {
-                    var clickCount by remember { mutableStateOf(0) }
-                    ExtendedFloatingActionButton(
-                        modifier = Modifier.padding(it),
-                        onClick = {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    "Snackbar # ${++clickCount}"
-                                )
-                            }
-                        }
-                    ) { Text("Show snackbar") }
-                },
-                content = { innerPadding ->
-                    KalenderUI(innerPadding)
+            ContentUI()
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ContentUI() {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val bottomSheetState = rememberModalBottomSheetState(true)
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            var clickCount by remember { mutableStateOf(0) }
+            ExtendedFloatingActionButton(
+                modifier = Modifier.padding(0.dp),
+                onClick = {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            "Snackbar # ${++clickCount}"
+                        )
+                    }
                 }
-            )
+            ) { Text("Show snackbar") }
+        },
+        content = { innerPadding ->
+            KalenderUI(innerPadding)
         }
     )
 }
