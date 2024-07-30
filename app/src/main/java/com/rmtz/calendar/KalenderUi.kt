@@ -2,6 +2,7 @@ package com.rmtz.calendar
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -171,6 +172,7 @@ fun KalenderUI(innerPadding: PaddingValues) {
 
                 TextMediumThin(text = message)
 
+                Log.d("Kalender", "Event:: ${events[0].tag.value}")
                 // Use LazyColumn for a list of events
                 LazyColumn {
                     items(events) { event ->

@@ -8,5 +8,6 @@ data class Event(
     val day: Int,
     val month: Int,
     val monthName: String,
-    val year: Int
+    val year: Int,
+    val tag: DateTag
 )

@@ -1,6 +1,7 @@
 package com.rmtz.calendar.libs
 
 import android.annotation.SuppressLint
+import com.rmtz.calendar.model.DateTag
 import com.rmtz.calendar.model.HijriDate
 import com.rmtz.calendar.model.Event
 import java.time.DayOfWeek
@@ -90,7 +91,8 @@ class Kalender {
                         day = it.second,
                         month = it.third,
                         monthName = Month.of(it.third).getDisplayName(TextStyle.SHORT, Locale("id")),
-                        year = date.year
+                        year = date.year,
+                        tag = DateTag.Holiday
                     ))
                 }
             }
@@ -105,6 +107,7 @@ class Kalender {
                         month = it.third,
                         monthName = getHijriDate(LocalDate.of(date.year, date.month, date.dayOfMonth)).monthName,
                         year = getHijriDate(LocalDate.of(date.year, date.month, date.dayOfMonth)).year,
+                        tag = DateTag.Holiday
                     ))
                 }
             }

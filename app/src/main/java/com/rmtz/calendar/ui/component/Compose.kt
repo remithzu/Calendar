@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rmtz.calendar.R
+import com.rmtz.calendar.model.DateTag
 import com.rmtz.calendar.model.Event
 import com.rmtz.calendar.ui.theme.AppTheme
 import com.rmtz.calendar.ui.theme.FlatUiColors
@@ -326,7 +327,8 @@ fun TestUI() {
         day = 3,
         month = 5,
         monthName = "Mey",
-        year = 2024
+        year = 2024,
+        tag = DateTag.Holiday
     )
     EventItem(event)
 }
