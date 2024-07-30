@@ -1,6 +1,8 @@
 package com.rmtz.calendar
 
 import android.annotation.SuppressLint
+import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProviderInfo
 import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -36,10 +38,19 @@ import com.rmtz.calendar.ui.theme.FlatUiColors
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private var widgetProvider: AppWidgetProviderInfo? = null
 
     @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Get the AppWidgetManager instance
+        val appWidgetManager = AppWidgetManager.getInstance(this)
+        // Safely get the list of widget providers
+        val widgetProviders = appWidgetManager.getInstalledProvidersForPackage(packageName, null)
+        // Check if the list is not empty before accessing the first element
+        widgetProvider = widgetProviders.firstOrNull()
+
         setContent {
             AppTheme {
                 // A surface container using the 'background' color from the theme
