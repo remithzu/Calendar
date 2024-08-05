@@ -13,4 +13,7 @@ sealed interface ImageState{
 
     @Serializable
     data class Success(val url : String) : ImageState
+
+    @Serializable
+    data class Failure(val message : String) : ImageState
 }

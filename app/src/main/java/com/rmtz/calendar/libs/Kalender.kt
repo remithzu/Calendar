@@ -25,7 +25,7 @@ class Kalender {
 
         @SuppressLint("NewApi")
         fun getDayOfJawa(date: LocalDate?): String {
-            val offMessages = arrayOf("wage", "kliwon", "legi", "pahing", "pon")
+            val offMessages = arrayOf("Wage", "Kliwon", "Legi", "Pahing", "Pon")
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             val epochDateTime = LocalDate.parse(epochTime, formatter)
             val daysSinceEpoch = ChronoUnit.DAYS.between(epochDateTime, date)

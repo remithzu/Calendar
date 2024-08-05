@@ -1,4 +1,4 @@
-package com.rmtz.calendar.worker
+package com.rmtz.calendar.service
 
 import android.content.Context
 import android.content.Intent
@@ -25,7 +25,6 @@ import coil.memory.MemoryCache
 import coil.request.ErrorResult
 import coil.request.ImageRequest
 import com.rmtz.calendar.model.ImageState
-import com.rmtz.calendar.stateDevinitions.ImageStateDefinition
 import com.rmtz.calendar.widget.KalenderWidget
 import kotlin.math.roundToInt
 
@@ -99,7 +98,7 @@ class KalenderWorker(
         glanceIds.forEach { glanceId ->
             updateAppWidgetState(
                 context = context,
-                definition = ImageStateDefinition,
+//                definition = ImageStateDefinition,
                 glanceId = glanceId,
                 updateState = { newState }
             )

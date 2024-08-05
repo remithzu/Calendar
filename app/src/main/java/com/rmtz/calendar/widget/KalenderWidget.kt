@@ -1,130 +1,133 @@
 package com.rmtz.calendar.widget
 
+import android.annotation.SuppressLint
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
 import android.content.Context
-import android.graphics.BitmapFactory
+import android.content.Intent
+import android.util.Log
+import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.net.toUri
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
-import androidx.glance.Image
-import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
-import androidx.glance.LocalGlanceId
-import androidx.glance.LocalSize
+import androidx.glance.action.Action
 import androidx.glance.action.clickable
-import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.ImageProvider
-import androidx.glance.appwidget.SizeMode
-import androidx.glance.appwidget.action.actionRunCallback
-import androidx.glance.appwidget.appWidgetBackground
-import androidx.glance.appwidget.cornerRadius
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.provideContent
-import androidx.glance.background
-import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
-import androidx.glance.layout.ContentScale
+import androidx.glance.layout.Column
+import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
-import androidx.glance.text.FontStyle
 import androidx.glance.text.Text
-import androidx.glance.text.TextAlign
-import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
-import com.rmtz.calendar.model.ImageState
-import com.rmtz.calendar.stateDevinitions.ImageStateDefinition
-import com.rmtz.calendar.worker.KalenderWorker
+import androidx.glance.unit.ColorProvider
+import com.rmtz.calendar.MainActivity
+import com.rmtz.calendar.R
+import com.rmtz.calendar.libs.Kalender
+import java.util.Locale
 
 class KalenderWidget: GlanceAppWidget() {
-    override val sizeMode: SizeMode = SizeMode.Exact
-    override val stateDefinition = ImageStateDefinition
-
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        provideContent {
-            Content()
+        val intent = Intent(context, MainActivity::class.java).apply {
         }
-    }
+        val action = actionStartActivity(intent)
 
-    private fun getBoxAlignment(imageState: ImageState): Alignment = when (imageState) {
-        ImageState.Loading -> Alignment.Center
-        is ImageState.Success -> Alignment.BottomEnd
-    }
-
-    @Composable
-    fun Content() {
-        val size = LocalSize.current
-        val context = LocalContext.current
-        val glanceId = LocalGlanceId.current
-        val imageState = currentState<ImageState>()
-        GlanceTheme {
-            Box(
-                modifier = GlanceModifier
-                    .fillMaxSize()
-                    .appWidgetBackground()
-                    .background(GlanceTheme.colors.background)
-                    .cornerRadius(16.dp),
-                contentAlignment = getBoxAlignment(imageState)
-            ) {
-                when (imageState) {
-                    ImageState.Loading -> LoadingState()
-                    is ImageState.Success -> SuccessState(path = imageState.url)
-                }
-
-                LaunchedEffect(Unit){
-                    KalenderWorker.enqueue(context, size, glanceId)
-                }
+        provideContent {
+            GlanceTheme {
+                GlanceKalenderUI(action)
             }
         }
     }
 
-    @Composable
-    private fun SuccessState(path: String) {
-        Image(
-            provider = getImageProvider(path),
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            modifier = GlanceModifier
-                .fillMaxSize()
-                .clickable(actionRunCallback<WidgetActions>())
+    override fun onCompositionError(
+        context: Context,
+        glanceId: GlanceId,
+        appWidgetId: Int,
+        throwable: Throwable
+    ) {
+        super.onCompositionError(context, glanceId, appWidgetId, throwable)
+        val rv = RemoteViews(context.packageName, R.layout.widget_error_layout)
+        rv.setTextViewText(
+            R.id.error_text_view,
+            "Error was thrown. \nThis is a custom view \nError Message: `${throwable.message}`"
         )
-        Text(
-            text = "Tap to refresh",
-            style = TextStyle(
-                color = GlanceTheme.colors.onSurface,
-                fontSize = 12.sp,
-                fontStyle = FontStyle.Italic,
-                textAlign = TextAlign.End,
-                textDecoration = TextDecoration.Underline
-            ),
-            modifier = GlanceModifier
-                .fillMaxWidth()
-                .padding(8.dp)
-                .background(GlanceTheme.colors.surface)
-        )
+        rv.setOnClickPendingIntent(R.id.error_icon, getErrorIntent(context, throwable))
+        AppWidgetManager.getInstance(context).updateAppWidget(appWidgetId, rv)
     }
 
+    private fun getErrorIntent(context: Context, throwable: Throwable): PendingIntent {
+        val intent = Intent(context, KalenderWidget::class.java)
+        intent.setAction("widgetError")
+        return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+    }
+
+    @SuppressLint("NewApi")
     @Composable
-    private fun LoadingState() {
-        CircularProgressIndicator()
-    }
+    fun GlanceKalenderUI(action: Action) {
+        var today by remember { mutableStateOf(Kalender.getToday())}
+        val holidays = Kalender.getHoliday(today)
+        val context = LocalContext.current
+        Box(GlanceModifier
+            .fillMaxSize()
+            .padding(16.dp, 8.dp)
+            .clickable{
+                Log.d("Kalender", "Clicked")
+                action
+            }
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = today.dayOfMonth.toString(),
+                    style = TextStyle(
+                        fontSize = 54.sp,
+                        color = ColorProvider(Color(0xFFd1d8e0))
+                    )
+                )
 
-    override suspend fun onDelete(context: Context, glanceId: GlanceId) {
-        super.onDelete(context, glanceId)
-        KalenderWorker.cancel(context, glanceId)
-    }
+                Column {
+                    Text(
+                        text = today.month.getDisplayName(java.time.format.TextStyle.FULL, Locale("id")),
+                        style = TextStyle(
+                            fontSize = 22.sp,
+                            color = ColorProvider(Color(0xFF4b7bec))
+                        )
+                    )
+                    Text(
+                        text = "${today.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, Locale("id"))} - ${Kalender.getDayOfJawa(today)}",
+                        style = TextStyle(
+                            fontSize = 16.sp,
+                            color = ColorProvider(Color(0xff222f3e))
+                        )
+                    )
+                }
+            }
 
-    private fun getImageProvider(path: String): ImageProvider {
-        if (path.startsWith("content://")) {
-            return ImageProvider(path.toUri())
+            Column(GlanceModifier.fillMaxSize(),Alignment.Bottom) {
+                if (holidays.isNotEmpty()) {
+                    holidays.forEach {
+                        Text(
+                            text = it.holiday,
+                            style = TextStyle(
+                                fontSize = 12.sp,
+                                color = ColorProvider(Color(0xFFeb3b5a))
+                            )
+                        )
+                    }
+                }
+            }
         }
-        val bitmap = BitmapFactory.decodeFile(path)
-        return ImageProvider(bitmap)
     }
 }
 

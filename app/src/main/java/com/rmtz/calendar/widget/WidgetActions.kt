@@ -5,7 +5,7 @@ import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.action.ActionCallback
-import com.rmtz.calendar.worker.KalenderWorker
+import com.rmtz.calendar.service.KalenderWorker
 
 class WidgetActions: ActionCallback {
     override suspend fun onAction(
