@@ -15,15 +15,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
 import androidx.glance.action.Action
+import androidx.glance.action.ActionModifier
+import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.provideContent
+import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -36,17 +40,25 @@ import androidx.glance.unit.ColorProvider
 import com.rmtz.calendar.MainActivity
 import com.rmtz.calendar.R
 import com.rmtz.calendar.libs.Kalender
+import kotlinx.coroutines.currentCoroutineContext
 import java.util.Locale
 
 class KalenderWidget: GlanceAppWidget() {
-    override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val intent = Intent(context, MainActivity::class.java).apply {
-        }
-        val action = actionStartActivity(intent)
+    companion object {
+        val kalender_today = stringPreferencesKey("kalender_today")
+        val kalender_holidays = stringPreferencesKey("kalender_holidays")
+    }
 
+    @SuppressLint("RestrictedApi")
+    fun GlanceModifier.clickable(onClick: Action): GlanceModifier =
+        this.then(ActionModifier(onClick))
+
+    private fun actionLaunchActivity(): Action = actionStartActivity(MainActivity::class.java)
+
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             GlanceTheme {
-                GlanceKalenderUI(action)
+                GlanceKalenderUI()
             }
         }
     }
@@ -75,16 +87,21 @@ class KalenderWidget: GlanceAppWidget() {
 
     @SuppressLint("NewApi")
     @Composable
-    fun GlanceKalenderUI(action: Action) {
+    fun GlanceKalenderUI() {
+        val currentDate = currentState(kalender_today)
+        val curentHoliday = currentState(kalender_holidays)
+        val context = LocalContext.current
+        Log.d("KalenderWidget", "date: $currentDate")
+        Log.d("KalenderWidget", "holiday: $curentHoliday")
+
         var today by remember { mutableStateOf(Kalender.getToday())}
         val holidays = Kalender.getHoliday(today)
-        val context = LocalContext.current
         Box(GlanceModifier
             .fillMaxSize()
             .padding(16.dp, 8.dp)
             .clickable{
-                Log.d("Kalender", "Clicked")
-                action
+                Log.d("KalenderWidget", "Clicked")
+                actionLaunchActivity()
             }
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {

@@ -171,8 +171,6 @@ fun KalenderUI(innerPadding: PaddingValues) {
                 }
 
                 TextMediumThin(text = message)
-
-                Log.d("Kalender", "Event:: ${events[0].tag.value}")
                 // Use LazyColumn for a list of events
                 LazyColumn {
                     items(events) { event ->
